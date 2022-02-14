@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import firebase from "../../../firebase";
-import "firebase/auth";
-import "firebase/firestore";
+import { auth , db } from "../../../firebase";
 import { AuthContext } from "../../../AuthProvider";
+import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
+import { collection, doc, setDoc } from "firebase/firestore";
 
 interface FormItems {
     username: string;
@@ -39,27 +39,39 @@ const SignUp = () => {
     const handleSubmit = (event: any) => {
         event?.preventDefault();
         console.log(values, 'values');
-        firebase
-        .auth()
-        .createUserWithEmailAndPassword(values.email, values.password)
-        .then((userCredential : firebase.auth.UserCredential) => {
+        createUserWithEmailAndPassword(auth, values.email, values.password)
+        .then((userCredential : UserCredential) => {
             authContext.setUser(userCredential);
-            const db = firebase.firestore();
-            db.collection("Users")
-            .doc(userCredential.user!.uid)
-            .set({
+        
+            const docRef = doc(collection(db, "Users") );
+    
+            setDoc(docRef,{
                 email: values.email,
                 username: values.username,
                 phone: values.phone
-            })
-            .then(() => {
-                console.log('ok');
-                history.push("/dashboard");
-            })
-            .catch(error => {
-                console.log(error.message);
+            }).then(() => {
+                console.log('Saved');
+                return;
+            }).catch(error => {
+                console.log("createUserWithEmailAndPassword error:", error.message);
                 alert(error.message);
             });
+            
+            // db.collection("Users")
+            // .doc(userCredential.user!.uid)
+            // .set({
+            //     email: values.email,
+            //     username: values.username,
+            //     phone: values.phone
+            // })
+            // .then(() => {
+            //     console.log('ok');
+            //     history.push("/dashboard");
+            // })
+            // .catch(error => {
+            //     console.log("createUserWithEmailAndPassword error:", error.message);
+            //     alert(error.message);
+            // });
         })
 
     }

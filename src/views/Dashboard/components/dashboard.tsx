@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from "react";
 import { useHistory } from "react-router-dom";
-import firebase from "../../../firebase";
-import "firebase/firestore";
+import  { auth, db } from "../../../firebase";
+import { signOut } from "firebase/auth";
+import {  doc, getDoc, } from "firebase/firestore";
 
 const Dashboard = () => {
     const [userName, setUserName] = useState();
@@ -10,21 +11,22 @@ const Dashboard = () => {
     const handleClick = (event: any) => {
         event.preventDefault();
 
-        firebase
-        .auth()
-        .signOut()
+
+        signOut(auth)
         .then(res => {
             history.push("/auth/login");
         })
     }
 
     useEffect(() => { 
-        const db = firebase.firestore();
-            db
-            .collection("Users")
-            .doc(firebase.auth().currentUser!.uid)
-            .get()
+        const docRef = doc(db, "Users", auth.currentUser!.uid);
+          getDoc(docRef)
+            // db
+            // .collection("Users")
+            // .doc(auth.currentUser!.uid)
+            // .get()
             .then(res => {
+                console.log({ res })
                 const user = res.data();
                 if (user) {
                     setUserName(user['username'])

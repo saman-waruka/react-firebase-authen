@@ -1,8 +1,9 @@
+import { onAuthStateChanged, User } from "firebase/auth";
 import React, { useEffect, useState } from "react";
-import firebase from "./firebase";
+import { auth } from "./firebase";
 
 type ContextProps = {
-    user: firebase.User | null;
+    user: User | null;
     authenticated: boolean;
     setUser: any;
     loadingAuthState: boolean;
@@ -11,11 +12,11 @@ type ContextProps = {
 export const AuthContext = React.createContext<Partial<ContextProps>>({});
 
 export const AuthProvider = ({ children }: any) => {
-    const [user, setUser] = useState(null as firebase.User | null);
+    const [user, setUser] = useState(null as User | null);
     const [loadingAuthState, setLoadingAuthState] = useState(true);
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged((user: any) => {
+        onAuthStateChanged(auth,(user: any) => {
             setUser(user);
             setLoadingAuthState(false);
             console.log(user, 'ap user');
